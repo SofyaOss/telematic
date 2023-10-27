@@ -1,0 +1,78 @@
+version: "3.7"
+
+services:
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:latest
+#    container_name: zookeeper
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#    ports:
+#      - "2181:2181"
+#
+#  kafka:
+#    image: confluentinc/cp-kafka:latest
+#    container_name: kafka
+#    hostname: kafka
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      #       KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
+#      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+#      #       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  app:
+    container_name: app
+    build: .
+    environment:
+      DATABASE_URL: "host=db user=postgres password=postgres dbname=postgres sslmode=disable"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: { }
+
+#  app:
+#    build: ./
+#    command: ./app
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      - postgres
+#    environment:
+#      - DB_PASSWORD=postgres
+#
+#  postgres:
+#    restart: always
+#    image: postgres:latest
+##    shm_size: 512M
+#    environment:
+##      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+##      POSTGRES_DB: etp-ignition
+##      PGDATA: /data/postgres
+#    volumes:
+#      - ./.database/postgres/data:/var/lib/postgresql/data
+##      - postgres:/data/postgres
+#    ports:
+#      - "5436:5432"
