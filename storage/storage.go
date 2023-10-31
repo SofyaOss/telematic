@@ -1,16 +1,21 @@
 package storage
 
 import (
-	"practice/internal/generator"
 	"time"
 )
+
+type Coordinates struct {
+	Latitude  float64
+	Longitude float64
+}
 
 type Car struct {
 	ID     int
 	Number int
 	Speed  int
-	Coords *generator.Coordinates
-	Date   time.Time
+	//Coords int
+	Coordinates
+	Date time.Time
 }
 
 type DBInterface interface {
