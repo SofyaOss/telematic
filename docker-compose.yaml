@@ -37,6 +37,18 @@ services:
      depends_on:
      - kafka
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+#    command: redis-server --save 20 1 --loglevel warning --requirepass
+#    volumes:
+#      - cache:/data
+#      - /redis-data:/var/lib/redis
+#      - /redis.conf:/usr/local/etc/redis/redis.conf
+
   app:
     container_name: app
     build: .
@@ -47,6 +59,7 @@ services:
     depends_on:
       - db
       - kafka
+      - redis
 
   db:
     container_name: db
@@ -62,6 +75,8 @@ services:
 
 volumes:
   pgdata: { }
+  cache:
+    driver: local
 
 #  app:
 #    build: ./

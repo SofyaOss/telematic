@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"practice/internal/generator"
+	"practice/storage"
 	"practice/storage/postgres"
 	"time"
 )
@@ -92,7 +95,78 @@ func main() {
 		}
 	*/
 
-	go generator.Generator()
+	client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	kafkaCh := make(chan *storage.Car)
+	for i := 0; i < 3; i++ {
+		go generator.Generate(i, kafkaCh)
+	}
+
+	for {
+		val, ok := <-kafkaCh
+		if ok == false {
+			log.Println(val, ok, "<-- loop broke!")
+			close(kafkaCh)
+			break // exit break loop
+		} else {
+			mes, err := json.Marshal(val)
+			if err != nil {
+				log.Println("AAAAAAAAAAAAA", err)
+			}
+
+			err = client.Set("1", mes, 0).Err()
+			if err != nil {
+				log.Println("aaaaaaaaa")
+			}
+
+			redisVar, err := client.Get("1").Result()
+			if err != nil {
+				log.Println("блять редис ты то че начинаешь", err)
+			}
+			log.Println("победа", redisVar)
+		}
+	}
+	/*
+		fmt.Println("created")
+		config := &kafka.ConfigMap{
+			"bootstrap.servers": "localhost:9092",
+		}
+		topic := "telematicTopic"
+		producer, err := kafka.NewProducer(config)
+		if err != nil {
+			panic(err)
+		}
+
+		for {
+			val, ok := <-kafkaCh
+			if ok == false {
+				log.Println(val, ok, "<-- loop broke!")
+				break // exit break loop
+			} else {
+				mes, err := json.Marshal(val)
+				if err != nil {
+					log.Println("AAAAAAAAAAAAA", err)
+				}
+				err = producer.Produce(&kafka.Message{
+					TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+					Value:          mes,
+				}, nil)
+				if err != nil {
+					log.Println("кафка блять", err)
+				} else {
+					log.Println("победа")
+				}
+				//log.Println(mes, ok)
+			}
+		}
+		log.Println("were here")
+		producer.Flush(15 * 1000)
+		producer.Close()
+	*/
 
 	router := mux.NewRouter()
 	//router.HandleFunc("/data", db.GetAllData()).Methods("GET")

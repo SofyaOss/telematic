@@ -22,12 +22,12 @@ func RandomTimestamp() time.Time {
 	return randomNow
 }
 
-func generate(c chan *storage.Car) {
+func Generate(num int, c chan *storage.Car) {
 	//var tList []*telematic
 	prevTimestamp := RandomTimestamp()
 	log.Println("time is", prevTimestamp)
 	prevCoords := storage.Coordinates{-90 + rand.Float64()*180, -180 + rand.Float64()*360} //res[i] = min + rand.Float64() * (max - min)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		newTimestamp := prevTimestamp.Add(time.Duration(rand.Intn(60)) * time.Second)
 		newSpeed := rand.Intn(120)
 		//fmt.Println(newTimestamp.Unix(), newTimestamp.Unix()/3600)
@@ -49,14 +49,14 @@ func generate(c chan *storage.Car) {
 		//	speed:     newSpeed,
 		//	coords:    newCoords,
 		//}
-		car := &storage.Car{0, 1, newSpeed, newCoords, newTimestamp}
+		car := &storage.Car{0, num, newSpeed, newCoords, newTimestamp}
 		c <- car
 		//tList = append(tList, t)
 		prevTimestamp = newTimestamp
 		prevCoords = newCoords
 		time.Sleep(1 * time.Second)
 	}
-	close(c)
+	return
 	//return tList
 }
 
@@ -66,12 +66,12 @@ func Generator() {
 	config := &kafka.ConfigMap{
 		"bootstrap.servers": "localhost:9092",
 	}
-	topic := "testTopic"
+	topic := "telematicTopic"
 	producer, err := kafka.NewProducer(config)
 	if err != nil {
 		panic(err)
 	}
-	go generate(kafkaCh)
+	go Generate(1, kafkaCh)
 	for {
 		val, ok := <-kafkaCh
 		if ok == false {
