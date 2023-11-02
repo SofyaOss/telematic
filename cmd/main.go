@@ -11,6 +11,7 @@ import (
 	"practice/internal/generator"
 	"practice/storage"
 	"practice/storage/postgres"
+	"strconv"
 	"time"
 )
 
@@ -106,6 +107,7 @@ func main() {
 		go generator.Generate(i, kafkaCh)
 	}
 
+	key := 0
 	for {
 		val, ok := <-kafkaCh
 		if ok == false {
@@ -118,18 +120,38 @@ func main() {
 				log.Println("AAAAAAAAAAAAA", err)
 			}
 
-			err = client.Set("1", mes, 0).Err()
-			if err != nil {
-				log.Println("aaaaaaaaa")
+			if key < 1000 {
+				err = client.Set(strconv.Itoa(key), mes, 0).Err()
+				if err != nil {
+					log.Println("aaaaaaaaa")
+				} else {
+					key++
+				}
+			} else {
+				client.Del(strconv.Itoa(key - 1000))
+				err = client.Set(strconv.Itoa(key), mes, 0).Err()
+				if err != nil {
+					log.Println("aaaaaaaaa2")
+				} else {
+					key++
+				}
 			}
 
-			redisVar, err := client.Get("1").Result()
-			if err != nil {
-				log.Println("блять редис ты то че начинаешь", err)
-			}
-			log.Println("победа", redisVar)
 		}
 	}
+	//redisVar, err := client.Get("2").Result()
+	//if err != nil {
+	//	log.Println("проверка", err)
+	//} else {
+	//	log.Println("победа", redisVar)
+	//}
+	//log.Println("закончили упражнение")
+	//client.Del("2")
+	//redisVar, err = client.Get("2").Result()
+	//if err != nil {
+	//	log.Println("допустим", err)
+	//}
+	//log.Println(redisVar)
 	/*
 		fmt.Println("created")
 		config := &kafka.ConfigMap{

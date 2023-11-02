@@ -27,7 +27,7 @@ func Generate(num int, c chan *storage.Car) {
 	prevTimestamp := RandomTimestamp()
 	log.Println("time is", prevTimestamp)
 	prevCoords := storage.Coordinates{-90 + rand.Float64()*180, -180 + rand.Float64()*360} //res[i] = min + rand.Float64() * (max - min)
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 8; i++ {
 		newTimestamp := prevTimestamp.Add(time.Duration(rand.Intn(60)) * time.Second)
 		newSpeed := rand.Intn(120)
 		//fmt.Println(newTimestamp.Unix(), newTimestamp.Unix()/3600)
