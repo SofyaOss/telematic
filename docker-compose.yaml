@@ -30,6 +30,7 @@ services:
 
   kowl:
      image: quay.io/cloudhut/kowl:master
+     container_name: kowl
      ports:
      - "8080:8080"
      environment:
@@ -54,6 +55,7 @@ services:
     build: .
     environment:
       DATABASE_URL: "host=db user=postgres password=postgres dbname=postgres sslmode=disable"
+      TRANSPORT_AMOUNT: 3
     ports:
       - "8000:8000"
     depends_on:

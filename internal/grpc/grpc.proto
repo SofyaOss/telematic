@@ -1,0 +1,38 @@
+syntax="proto3";
+
+package grpc;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package="/";
+
+message Car {
+  int64 id=1;
+  int64 number=2;
+  int64 speed=3;
+  float latitude=4;
+  float longitude=5;
+  google.protobuf.Timestamp date=6;
+}
+
+message GetByDateRequest {
+  string firstDate = 1;
+  string LastDate = 2;
+}
+
+message GetByDateResponse {
+  repeated Car cars = 1;
+}
+
+message GetLastRequest {
+  string num = 1;
+}
+
+message GetLastResponse {
+  Car cars = 1;
+}
+
+service GRPCService {
+  rpc GetByDate(GetByDateRequest) returns (GetByDateResponse) {}
+  rpc GetLast(GetLastRequest) returns (GetLastResponse) {}
+}

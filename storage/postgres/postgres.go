@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	pb "practice/internal/grpc"
 	"practice/storage"
 	"time"
 
@@ -140,7 +141,7 @@ func (t *TelematicDB) GetAllData() ([]storage.Car, error) {
 	//}
 }
 
-func (t *TelematicDB) GetByDate(d1s, d2s string) ([]storage.Car, error) {
+func (t *TelematicDB) GetByDate(d1s, d2s string) ([]*pb.Car, error) {
 	d1, err1 := time.Parse("2006-01-02", d1s)
 	if err1 != nil {
 		return nil, err1
@@ -154,7 +155,7 @@ func (t *TelematicDB) GetByDate(d1s, d2s string) ([]storage.Car, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var cars []storage.Car
+	var cars []*pb.Car
 	for rows.Next() {
 		var car storage.Car
 		err = rows.Scan(
@@ -168,13 +169,13 @@ func (t *TelematicDB) GetByDate(d1s, d2s string) ([]storage.Car, error) {
 		if err != nil {
 			return nil, err
 		}
-		cars = append(cars, car)
+		cars = append(cars, CarPostgresToProto(&car))
 	}
 	return cars, nil
 }
 
-func (t *TelematicDB) GetByCarNumber(carNums []int) ([]storage.Car, error) {
-	var res []storage.Car
+func (t *TelematicDB) GetByCarNumber(carNums []int) ([]*pb.Car, error) {
+	var res []*pb.Car
 	for _, num := range carNums {
 		rows, err := t.db.Query(context.Background(), `SELECT * FROM telematic WHERE car_number=$1 ORDER BY id desc LIMIT 1;`, num)
 		if err != nil {
@@ -194,7 +195,7 @@ func (t *TelematicDB) GetByCarNumber(carNums []int) ([]storage.Car, error) {
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, car)
+			res = append(res, CarPostgresToProto(&car))
 		}
 	}
 	return res, nil
@@ -216,7 +217,7 @@ func GetByID(db *sql.DB, num, speed, coords int) http.HandlerFunc {
 	}
 }
 
-func (t *TelematicDB) AddData(c storage.Car) error {
+func (t *TelematicDB) AddData(c *storage.Car) error {
 	err := t.db.QueryRow(context.Background(),
 		`INSERT INTO telematic (car_number, speed, latitude, longitude, date) VALUES ($1, $2, $3, $4, $5);`,
 		c.Number, c.Speed, fmt.Sprint(c.Coordinates.Latitude), fmt.Sprint(c.Coordinates.Longitude), c.Date).Scan()

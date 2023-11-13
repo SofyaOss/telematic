@@ -2,14 +2,18 @@ package generator
 
 import (
 	"fmt"
+	"practice/storage"
+
+	//"github.com/golang/protobuf/protoc-gen-go/generator"
+	"math/rand"
 	"testing"
 	//"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 func TestGenerator(t *testing.T) {
-	kafkaCh := make(chan *telematic)
+	kafkaCh := make(chan *storage.Car)
 	fmt.Println("created")
-	go generate(kafkaCh)
+	go Generate(rand.Intn(3), kafkaCh)
 
 	//config := &kafka.ConfigMap{
 	//	"bootstrap.servers": "localhost:9092",
@@ -26,7 +30,7 @@ func TestGenerator(t *testing.T) {
 			fmt.Println(val, ok, "<-- loop broke!")
 			break // exit break loop
 		} else {
-			fmt.Println(val.timestamp, ok)
+			fmt.Println(val, ok)
 		}
 	}
 

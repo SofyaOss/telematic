@@ -10,6 +10,7 @@ RUN go get -d -v ./...
 
 # Build the Go app
 RUN go build -o api ./cmd
+#RUN go test -o api ./internal/generator
 
 #EXPOSE the port
 EXPOSE 8000
