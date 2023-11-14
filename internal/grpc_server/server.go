@@ -58,7 +58,6 @@ func (g *grpcServer) Close() error {
 func (g *grpcServer) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*pb.GetByDateResponse, error) {
 	firstDate := req.GetFirstDate()
 	lastDate := req.GetLastDate()
-	//var cars []pb.Car
 	res, err := g.db.GetByDate(firstDate, lastDate)
 	if err != nil {
 		return nil, err

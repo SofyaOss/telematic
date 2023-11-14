@@ -2,7 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
+	"fmt"
+	"github.com/jackc/pgx/v4"
+
+	//"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	pb "practice/internal/grpc"
 	"practice/internal/grpc_server"
 	"strconv"
 
@@ -123,27 +132,33 @@ func main() {
 	}
 
 	key := 0
-	for {
-		val, ok := <-kafkaCh
-		if ok == false {
-			log.Println(val, ok, "<-- loop broke!")
-			close(kafkaCh)
-			break // exit break loop
-		} else {
-			err = redis.AddToRedis(newRedis, val, key)
-			if err != nil {
-				log.Fatalf("could not add element to redis: %s", err)
+	go func() {
+		for {
+			val, ok := <-kafkaCh
+			if ok == false {
+				log.Println(val, ok, "<-- loop broke!")
+				close(kafkaCh)
+				break // exit break loop
+			} else {
+				err = db.AddData(val)
+				if err != nil && !errors.Is(pgx.ErrNoRows, err) {
+					log.Fatalf("could not add element to db: %s", err)
+				}
+				err = redis.AddToRedis(newRedis, val, key)
+				if err != nil {
+					log.Fatalf("could not add element to redis: %s", err)
+				}
+				err = myKafka.Produce(newKafkaProducer, val)
+				if err != nil {
+					log.Fatalf("could not add element to kafka: %s", err)
+				}
+				key++
 			}
-			err = myKafka.Produce(newKafkaProducer, val)
-			if err != nil {
-				log.Fatalf("could not add element to kafka: %s", err)
+			if key >= 24 {
+				break
 			}
-			key++
 		}
-		if key >= 24 {
-			break
-		}
-	}
+	}()
 
 	//key := 0
 	//for {
@@ -276,18 +291,50 @@ func main() {
 	//}
 	var gRPCAddr string
 
-	flag.StringVar(&gRPCAddr, "grpc-addr", "localhost:11000", "Set the grpc address")
+	flag.StringVar(&gRPCAddr, "grpc-addr", "localhost:4040", "Set the grpc address")
 	srv := grpc_server.New(gRPCAddr, db)
 	if err := srv.Open(); err != nil {
 		log.Fatalf("failed to start server: %s", err)
 	} else {
 		log.Println("урааа")
 	}
+
+	conn, err := grpc.Dial(gRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("connection failed: %s", err)
+	}
+	defer conn.Close()
+	client := pb.NewGRPCServiceClient(conn)
+	router := gin.Default()
+	router.GET("/date/:d1/:d2", func(ctx *gin.Context) {
+		d1 := ctx.Param("d1")
+		d2 := ctx.Param("d2")
+		res, err := client.GetByDate(ctx, &pb.GetByDateRequest{FirstDate: d1, LastDate: d2})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"cars": res.Cars,
+		})
+	})
+	if err := router.Run(":8000"); err != nil {
+		log.Fatalf("failed to run server: %s", err)
+	}
+	//router.HandleFunc("/data", client.GetByDate()).Methods("GET")
 }
 
 func jsonContentTypeMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
+	})
+}
+
+func success(ctx *gin.Context, response *pb.GetByDateResponse) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"result": fmt.Sprint(response.Cars),
 	})
 }

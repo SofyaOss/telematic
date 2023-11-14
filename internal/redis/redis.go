@@ -36,7 +36,7 @@ func AddToRedis(client *Client, c *storage.Car, key int) error {
 			return err
 		} else {
 			key++
-			log.Println("< 1000")
+			//log.Println("< 1000")
 		}
 	} else {
 		client.client.Del(strconv.Itoa(key - 20))
@@ -46,7 +46,7 @@ func AddToRedis(client *Client, c *storage.Car, key int) error {
 			return err
 		} else {
 			key++
-			log.Println("> 1000")
+			//log.Println("> 1000")
 		}
 	}
 	return nil

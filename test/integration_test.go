@@ -2,7 +2,9 @@ package test
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v4"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	"log"
@@ -86,8 +88,8 @@ func TestMain(m *testing.M) {
 			break // exit break loop
 		} else {
 			err = db.AddData(val)
-			if err != nil {
-				log.Println("add data error", err)
+			if err != nil && !errors.Is(pgx.ErrNoRows, err) {
+				log.Fatalf("could not add element to db: %s", err)
 			}
 		}
 	}
