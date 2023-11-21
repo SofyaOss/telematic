@@ -4,35 +4,14 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"log"
-	"net"
 	pb "practice/internal/grpc"
 	"practice/storage/postgres"
 )
-
-//type Server struct {
-//	pb.UnimplementedGRPCServiceServer
-//}
-//
-//func (s *Server) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*pb.GetByDateResponse, error) {
-//	firstDate := req.GetFirstDate()
-//	lastDate := req.GetLastDate()
-//	log.Println(firstDate, lastDate)
-//	var res []*pb.Car
-//	return &pb.GetByDateResponse{
-//		Cars: res,
-//	}, nil
-//}
-//
-//func (s *Server) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
-//	return nil, nil
-//}
 
 type Server struct {
 	pb.UnimplementedGRPCServiceServer
 	Grpc   *grpc.Server
 	db     *postgres.TelematicDB
-	lis    net.Listener
-	addr   string
 	logger *log.Logger
 }
 
@@ -47,6 +26,7 @@ func New(db *postgres.TelematicDB) *Server {
 	return &s
 }
 
+/*
 func (s *Server) Open() {
 	lis, err := net.Listen("tcp", s.addr)
 	if err != nil {
@@ -56,16 +36,8 @@ func (s *Server) Open() {
 	if err := s.Grpc.Serve(lis); err != nil {
 		s.logger.Println("gRPC server returned:", err.Error())
 	}
-	//go func() {
-	//err := s.Grpc.Serve(s.lis)
-	//if err := s.Grpc.Serve(lis); err != nil {
-	//	s.logger.Println("gRPC server returned:", err.Error())
-	//}
-	//if err != nil {
-	//	s.logger.Println("gRPC server returned:", err.Error())
-	//}
-	//}()
 }
+*/
 
 func (g *grpcServer) Close() error {
 	g.Grpc.GracefulStop()
