@@ -28,6 +28,13 @@ services:
       #       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
 
+  init-kafka:
+    container_name: init-kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    command: kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic telematicTopic --replication-factor 1 --partitions 1
+
   kowl:
      image: quay.io/cloudhut/kowl:master
      container_name: kowl
@@ -44,18 +51,13 @@ services:
     restart: always
     ports:
       - "6379:6379"
-#    command: redis-server --save 20 1 --loglevel warning --requirepass
-#    volumes:
-#      - cache:/data
-#      - /redis-data:/var/lib/redis
-#      - /redis.conf:/usr/local/etc/redis/redis.conf
 
   app:
     container_name: app
     build: .
     environment:
       DATABASE_URL: "host=db user=postgres password=postgres dbname=postgres sslmode=disable"
-      TRANSPORT_AMOUNT: 3
+      TRANSPORT_AMOUNT: 7
     ports:
       - "8000:8000"
     depends_on:
@@ -79,28 +81,3 @@ volumes:
   pgdata: { }
   cache:
     driver: local
-
-#  app:
-#    build: ./
-#    command: ./app
-#    ports:
-#      - "8000:8000"
-#    depends_on:
-#      - postgres
-#    environment:
-#      - DB_PASSWORD=postgres
-#
-#  postgres:
-#    restart: always
-#    image: postgres:latest
-##    shm_size: 512M
-#    environment:
-##      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres
-##      POSTGRES_DB: etp-ignition
-##      PGDATA: /data/postgres
-#    volumes:
-#      - ./.database/postgres/data:/var/lib/postgresql/data
-##      - postgres:/data/postgres
-#    ports:
-#      - "5436:5432"

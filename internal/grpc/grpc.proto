@@ -17,7 +17,8 @@ message Car {
 
 message GetByDateRequest {
   string firstDate = 1;
-  string LastDate = 2;
+  string lastDate = 2;
+  repeated int64 nums = 3;
 }
 
 message GetByDateResponse {
@@ -25,11 +26,11 @@ message GetByDateResponse {
 }
 
 message GetLastRequest {
-  string num = 1;
+  repeated int64 nums = 1;
 }
 
 message GetLastResponse {
-  Car cars = 1;
+  repeated Car cars = 1;
 }
 
 service GRPCService {

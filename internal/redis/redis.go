@@ -12,9 +12,9 @@ type Client struct {
 	client *redis.Client
 }
 
-func New() *Client {
+func New(addr string) *Client { // создание нового клиента редис
 	client := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     addr,
 		Password: "",
 		DB:       0,
 	})
@@ -22,31 +22,28 @@ func New() *Client {
 	return &c
 }
 
-func AddToRedis(client *Client, c *storage.Car, key int) error {
-	mes, err := json.Marshal(c)
+func (c *Client) AddToRedis(car *storage.Car, key int) error { // отправка сообщения в редис
+	mes, err := json.Marshal(car)
 	if err != nil {
-		log.Println("AAAAAAAAAAAAA", err)
 		return err
 	}
 
-	if key < 20 {
-		err = client.client.Set(strconv.Itoa(key), mes, 0).Err()
+	if key < 1000 {
+		err = c.client.Set(strconv.Itoa(key), mes, 0).Err()
 		if err != nil {
-			log.Println("aaaaaaaaa")
+			log.Fatalf("Could not set value in redis: %s", err)
 			return err
 		} else {
 			key++
-			//log.Println("< 1000")
 		}
 	} else {
-		client.client.Del(strconv.Itoa(key - 20))
-		err = client.client.Set(strconv.Itoa(key), mes, 0).Err()
+		c.client.Del(strconv.Itoa(key - 1000))
+		err = c.client.Set(strconv.Itoa(key), mes, 0).Err()
 		if err != nil {
-			log.Println("aaaaaaaaa2")
+			log.Fatalf("Could not set value in redis: %s", err)
 			return err
 		} else {
 			key++
-			//log.Println("> 1000")
 		}
 	}
 	return nil

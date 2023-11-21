@@ -12,45 +12,63 @@ import (
 //type Server struct {
 //	pb.UnimplementedGRPCServiceServer
 //}
+//
+//func (s *Server) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*pb.GetByDateResponse, error) {
+//	firstDate := req.GetFirstDate()
+//	lastDate := req.GetLastDate()
+//	log.Println(firstDate, lastDate)
+//	var res []*pb.Car
+//	return &pb.GetByDateResponse{
+//		Cars: res,
+//	}, nil
+//}
+//
+//func (s *Server) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
+//	return nil, nil
+//}
 
 type Server struct {
 	pb.UnimplementedGRPCServiceServer
-	grpc   *grpc.Server
+	Grpc   *grpc.Server
 	db     *postgres.TelematicDB
-	ln     net.Listener
+	lis    net.Listener
 	addr   string
 	logger *log.Logger
 }
 
 type grpcServer Server
 
-func New(addr string, db *postgres.TelematicDB) *Server {
+func New(db *postgres.TelematicDB) *Server {
 	s := Server{
-		grpc: grpc.NewServer(),
+		Grpc: grpc.NewServer(),
 		db:   db,
-		addr: addr,
 	}
-	pb.RegisterGRPCServiceServer(s.grpc, (*grpcServer)(&s))
+	pb.RegisterGRPCServiceServer(s.Grpc, (*grpcServer)(&s))
 	return &s
 }
 
-func (s *Server) Open() error {
-	ln, err := net.Listen("tcp", s.addr)
+func (s *Server) Open() {
+	lis, err := net.Listen("tcp", s.addr)
 	if err != nil {
-		return err
+		log.Fatalf("could not listen to port: %s", err)
 	}
-	s.ln = ln
-	go func() {
-		err := s.grpc.Serve(s.ln)
-		if err != nil {
-			s.logger.Println("gRPC server returned:", err.Error())
-		}
-	}()
-	return nil
+	s.lis = lis
+	if err := s.Grpc.Serve(lis); err != nil {
+		s.logger.Println("gRPC server returned:", err.Error())
+	}
+	//go func() {
+	//err := s.Grpc.Serve(s.lis)
+	//if err := s.Grpc.Serve(lis); err != nil {
+	//	s.logger.Println("gRPC server returned:", err.Error())
+	//}
+	//if err != nil {
+	//	s.logger.Println("gRPC server returned:", err.Error())
+	//}
+	//}()
 }
 
 func (g *grpcServer) Close() error {
-	g.grpc.GracefulStop()
+	g.Grpc.GracefulStop()
 	g.logger.Println("gRPC server stopped")
 	return nil
 }
@@ -58,7 +76,8 @@ func (g *grpcServer) Close() error {
 func (g *grpcServer) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*pb.GetByDateResponse, error) {
 	firstDate := req.GetFirstDate()
 	lastDate := req.GetLastDate()
-	res, err := g.db.GetByDate(firstDate, lastDate)
+	nums := req.GetNums()
+	res, err := g.db.GetByDate(firstDate, lastDate, nums)
 	if err != nil {
 		return nil, err
 	}
@@ -72,5 +91,12 @@ func (g *grpcServer) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*
 }
 
 func (g *grpcServer) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
-	return nil, nil
+	nums := req.GetNums()
+	res, err := g.db.GetByCarNumber(nums)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetLastResponse{
+		Cars: res,
+	}, nil
 }

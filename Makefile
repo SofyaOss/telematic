@@ -7,4 +7,7 @@ run:
 	sudo docker compose up app
 
 test:
-	go test ./...
+	go test test/integration_test.go
+
+lint:
+	golint ./...
