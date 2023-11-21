@@ -69,13 +69,13 @@ func main() {
 				break // exit break loop
 			} else {
 				val.ID = key
-				err = db.AddData(val) // добавиление в бд
-				if err != nil && !errors.Is(pgx.ErrNoRows, err) {
-					log.Fatalf("Could not add element to db: %s", err)
-				}
 				err = newRedis.AddToRedis(val, key) // добавление в редис
 				if err != nil {
 					log.Fatalf("Could not add element to redis: %s", err)
+				}
+				err = db.AddData(val) // добавиление в бд
+				if err != nil && !errors.Is(pgx.ErrNoRows, err) {
+					log.Fatalf("Could not add element to db: %s", err)
 				}
 				err = myKafka.Produce(newKafkaProducer, val) // отправка сообщения в кафку
 				if err != nil {
