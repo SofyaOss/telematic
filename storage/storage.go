@@ -1,7 +1,10 @@
 package storage
 
 import (
+	"context"
 	"time"
+
+	pb "practice/internal/grpc"
 )
 
 type Coordinates struct {
@@ -13,12 +16,14 @@ type Car struct {
 	ID     int
 	Number int
 	Speed  int
-	//Coords int
 	Coordinates
 	Date time.Time
 }
 
 type DBInterface interface {
-	GetTelematic(date1, date2 int64, car int) ([]Car, error)
-	GetLatest(cars []int) ([]Car, error)
+	CreateTable(ctx context.Context) error
+	DropTable(ctx context.Context) error
+	AddData(c *Car, ctx context.Context) error
+	GetByDate(d1s, d2s string, nums []int64, ctx context.Context) ([]*pb.Car, error)
+	GetByCarNumber(ctx context.Context, carNums []int64) ([]*pb.Car, error)
 }

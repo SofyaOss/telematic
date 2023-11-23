@@ -7,33 +7,33 @@ import "google/protobuf/timestamp.proto";
 option go_package="/";
 
 message Car {
-  int64 id=1;
-  int64 number=2;
-  int64 speed=3;
-  float latitude=4;
-  float longitude=5;
-  google.protobuf.Timestamp date=6;
+  int64 id                        = 1;
+  int64 number                    = 2;
+  int64 speed                     = 3;
+  float latitude                  = 4;
+  float longitude                 = 5;
+  google.protobuf.Timestamp date  = 6;
 }
 
-message GetByDateRequest {
-  string firstDate = 1;
-  string lastDate = 2;
+message CarsByDateRequest {
+  string firstDate    = 1;
+  string lastDate     = 2;
   repeated int64 nums = 3;
 }
 
-message GetByDateResponse {
+message CarsByDateResponse {
   repeated Car cars = 1;
 }
 
-message GetLastRequest {
+message LastCarsRequest {
   repeated int64 nums = 1;
 }
 
-message GetLastResponse {
+message LastCarsResponse {
   repeated Car cars = 1;
 }
 
 service GRPCService {
-  rpc GetByDate(GetByDateRequest) returns (GetByDateResponse) {}
-  rpc GetLast(GetLastRequest) returns (GetLastResponse) {}
+  rpc GetCarsByDate(CarsByDateRequest) returns (CarsByDateResponse) {}
+  rpc GetLastCars(LastCarsRequest) returns (LastCarsResponse) {}
 }

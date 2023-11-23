@@ -2,10 +2,12 @@ package grpc_server
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"log"
+
 	pb "practice/internal/grpc"
 	"practice/storage/postgres"
+
+	"google.golang.org/grpc"
 )
 
 type Server struct {
@@ -45,15 +47,15 @@ func (g *grpcServer) Close() error {
 	return nil
 }
 
-func (g *grpcServer) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*pb.GetByDateResponse, error) {
+func (g *grpcServer) GetCarsByDate(ctx context.Context, req *pb.CarsByDateRequest) (*pb.CarsByDateResponse, error) {
 	firstDate := req.GetFirstDate()
 	lastDate := req.GetLastDate()
 	nums := req.GetNums()
-	res, err := g.db.GetByDate(firstDate, lastDate, nums)
+	res, err := g.db.GetByDate(firstDate, lastDate, nums, ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetByDateResponse{
+	return &pb.CarsByDateResponse{
 		Cars: res,
 	}, nil
 	//for
@@ -62,13 +64,13 @@ func (g *grpcServer) GetByDate(ctx context.Context, req *pb.GetByDateRequest) (*
 	//}, nil
 }
 
-func (g *grpcServer) GetLast(ctx context.Context, req *pb.GetLastRequest) (*pb.GetLastResponse, error) {
+func (g *grpcServer) GetLastCars(ctx context.Context, req *pb.LastCarsRequest) (*pb.LastCarsResponse, error) {
 	nums := req.GetNums()
-	res, err := g.db.GetByCarNumber(nums)
+	res, err := g.db.GetByCarNumber(ctx, nums)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetLastResponse{
+	return &pb.LastCarsResponse{
 		Cars: res,
 	}, nil
 }

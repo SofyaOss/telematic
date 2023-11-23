@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: grpc.proto
+// source: grpc/grpc.proto
 
 package __
 
@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GRPCServiceClient interface {
-	GetByDate(ctx context.Context, in *GetByDateRequest, opts ...grpc.CallOption) (*GetByDateResponse, error)
-	GetLast(ctx context.Context, in *GetLastRequest, opts ...grpc.CallOption) (*GetLastResponse, error)
+	GetCarsByDate(ctx context.Context, in *CarsByDateRequest, opts ...grpc.CallOption) (*CarsByDateResponse, error)
+	GetLastCars(ctx context.Context, in *LastCarsRequest, opts ...grpc.CallOption) (*LastCarsResponse, error)
 }
 
 type gRPCServiceClient struct {
@@ -34,18 +34,18 @@ func NewGRPCServiceClient(cc grpc.ClientConnInterface) GRPCServiceClient {
 	return &gRPCServiceClient{cc}
 }
 
-func (c *gRPCServiceClient) GetByDate(ctx context.Context, in *GetByDateRequest, opts ...grpc.CallOption) (*GetByDateResponse, error) {
-	out := new(GetByDateResponse)
-	err := c.cc.Invoke(ctx, "/grpc.GRPCService/GetByDate", in, out, opts...)
+func (c *gRPCServiceClient) GetCarsByDate(ctx context.Context, in *CarsByDateRequest, opts ...grpc.CallOption) (*CarsByDateResponse, error) {
+	out := new(CarsByDateResponse)
+	err := c.cc.Invoke(ctx, "/grpc.GRPCService/GetCarsByDate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *gRPCServiceClient) GetLast(ctx context.Context, in *GetLastRequest, opts ...grpc.CallOption) (*GetLastResponse, error) {
-	out := new(GetLastResponse)
-	err := c.cc.Invoke(ctx, "/grpc.GRPCService/GetLast", in, out, opts...)
+func (c *gRPCServiceClient) GetLastCars(ctx context.Context, in *LastCarsRequest, opts ...grpc.CallOption) (*LastCarsResponse, error) {
+	out := new(LastCarsResponse)
+	err := c.cc.Invoke(ctx, "/grpc.GRPCService/GetLastCars", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (c *gRPCServiceClient) GetLast(ctx context.Context, in *GetLastRequest, opt
 // All implementations must embed UnimplementedGRPCServiceServer
 // for forward compatibility
 type GRPCServiceServer interface {
-	GetByDate(context.Context, *GetByDateRequest) (*GetByDateResponse, error)
-	GetLast(context.Context, *GetLastRequest) (*GetLastResponse, error)
+	GetCarsByDate(context.Context, *CarsByDateRequest) (*CarsByDateResponse, error)
+	GetLastCars(context.Context, *LastCarsRequest) (*LastCarsResponse, error)
 	mustEmbedUnimplementedGRPCServiceServer()
 }
 
@@ -65,11 +65,11 @@ type GRPCServiceServer interface {
 type UnimplementedGRPCServiceServer struct {
 }
 
-func (UnimplementedGRPCServiceServer) GetByDate(context.Context, *GetByDateRequest) (*GetByDateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetByDate not implemented")
+func (UnimplementedGRPCServiceServer) GetCarsByDate(context.Context, *CarsByDateRequest) (*CarsByDateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCarsByDate not implemented")
 }
-func (UnimplementedGRPCServiceServer) GetLast(context.Context, *GetLastRequest) (*GetLastResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetLast not implemented")
+func (UnimplementedGRPCServiceServer) GetLastCars(context.Context, *LastCarsRequest) (*LastCarsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLastCars not implemented")
 }
 func (UnimplementedGRPCServiceServer) mustEmbedUnimplementedGRPCServiceServer() {}
 
@@ -84,38 +84,38 @@ func RegisterGRPCServiceServer(s grpc.ServiceRegistrar, srv GRPCServiceServer) {
 	s.RegisterService(&GRPCService_ServiceDesc, srv)
 }
 
-func _GRPCService_GetByDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetByDateRequest)
+func _GRPCService_GetCarsByDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CarsByDateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GRPCServiceServer).GetByDate(ctx, in)
+		return srv.(GRPCServiceServer).GetCarsByDate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.GRPCService/GetByDate",
+		FullMethod: "/grpc.GRPCService/GetCarsByDate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GRPCServiceServer).GetByDate(ctx, req.(*GetByDateRequest))
+		return srv.(GRPCServiceServer).GetCarsByDate(ctx, req.(*CarsByDateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GRPCService_GetLast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetLastRequest)
+func _GRPCService_GetLastCars_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LastCarsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GRPCServiceServer).GetLast(ctx, in)
+		return srv.(GRPCServiceServer).GetLastCars(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.GRPCService/GetLast",
+		FullMethod: "/grpc.GRPCService/GetLastCars",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GRPCServiceServer).GetLast(ctx, req.(*GetLastRequest))
+		return srv.(GRPCServiceServer).GetLastCars(ctx, req.(*LastCarsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,14 +128,14 @@ var GRPCService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*GRPCServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetByDate",
-			Handler:    _GRPCService_GetByDate_Handler,
+			MethodName: "GetCarsByDate",
+			Handler:    _GRPCService_GetCarsByDate_Handler,
 		},
 		{
-			MethodName: "GetLast",
-			Handler:    _GRPCService_GetLast_Handler,
+			MethodName: "GetLastCars",
+			Handler:    _GRPCService_GetLastCars_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "grpc.proto",
+	Metadata: "grpc/grpc.proto",
 }

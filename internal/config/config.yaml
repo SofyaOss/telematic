@@ -1,0 +1,11 @@
+redis:
+  port: "6379"
+  host: "redis"
+
+kafka:
+  port: "9092"
+  host: "kafka"
+
+grpc:
+  port: "8000"
+  host: "localhost"

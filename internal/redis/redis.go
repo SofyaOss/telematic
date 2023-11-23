@@ -2,10 +2,12 @@ package redis
 
 import (
 	"encoding/json"
-	"github.com/go-redis/redis"
 	"log"
-	"practice/storage"
 	"strconv"
+
+	"practice/storage"
+
+	"github.com/go-redis/redis"
 )
 
 type Client struct {
